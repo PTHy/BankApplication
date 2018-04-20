@@ -42,8 +42,14 @@ public class BankApplication {
 		owner = sc.next();
 		System.out.print("초기입급금액: ");
 		balance = sc.nextInt();
+		
+		if(findAccount(ano) != null) {
+			System.out.println("이미 존재하는 계좌번호 입니다.");
+			return;
+		}
+		
 		Account newAc = new Account(ano, owner, balance);
-
+		
 		for (int i = 0; i < accountArray.length; i++) {
 			if (accountArray[i] == null) {
 				accountArray[i] = newAc;
@@ -83,20 +89,22 @@ public class BankApplication {
 		
 		ac = findAccount(ano);
 		
-		if (ac != null) {
+		if (ac != null && balance > 0) {
 			balance += ac.getBalance();
 			ac.setBalance(balance);
 			System.out.println("입금이 성공되었습니다.");
 			return;
-		} else {
+		} else if(ac == null) {
 			System.out.println("계좌를 찾을 수 없습니다.");
+		} else if(balance <= 0) {
+			System.out.println("예금액은 0원 이하가 될 수 없습니다.");
 		}
 	}
 
 	// 출금하기
 	private static void withdraw() {
 		String ano;
-		int balance;
+		int balance, curBal;
 		Account ac;
 		System.out.println("-----------");
 		System.out.println("출금");
@@ -105,25 +113,36 @@ public class BankApplication {
 		ano = sc.next();
 		System.out.println("출금액 : ");
 		balance = sc.nextInt();
-
+		
 		
 		ac = findAccount(ano);
 		
-		if (ac != null) {
+		if(ac != null) {
+			curBal = ac.getBalance();
+		} else {
+			System.out.println("계좌를 찾을 수 없습니다.");
+			return;
+		}
+		
+		if (balance > 0 && balance <= curBal) {
 			balance = ac.getBalance() - balance;
 			ac.setBalance(balance);
 			System.out.println("출금이 성공되었습니다.");
 			return;
-		} else {
-			System.out.println("계좌를 찾을 수 없습니다.");
+		} else if(balance <= 0) {
+			System.out.println("출금액은 0원 이하가 될 수 없습니다.");
+		} else if(balance > curBal) {
+			System.out.println("출금액이 너무 많습니다. 0~"+curBal+"원 사이에서 선택해주세요");
 		}
 	}
 
 	// Account배열에서 ano와 동일한 Account 객체 찾기
 	private static Account findAccount(String ano) {
 		for (int i = 0; i < accountArray.length; i++) {
-			if (accountArray[i].getAno().equals(ano)) {
-				return accountArray[i];
+			if(accountArray[i] != null) {
+				if (accountArray[i].getAno().equals(ano)) {
+					return accountArray[i];
+				}
 			}
 		}
 		return null;
